@@ -116,7 +116,9 @@ client.on("interactionCreate", async (interaction) => {
   );
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(
+  `MTE5MTcxNzUzODU3MzMyMDI5Mg.GYCfhq.OZDvMunx8-FhHkAlbB5-8BvGQKe9zq_RGh7sHE`
+);
 
 function calculatePlayerGP(levelsString) {
   const levels = levelsString.split(",").map((level) => parseInt(level.trim()));
