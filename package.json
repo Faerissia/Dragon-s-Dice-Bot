@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm install & node app.js",
-    "command": "nodemon src/reward-command.js"
+    "start": "npm install & node app.js"
   },
   "keywords": [],
   "author": "",
