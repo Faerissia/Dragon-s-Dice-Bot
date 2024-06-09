@@ -1,17 +1,15 @@
-const {
-  Client,
-  IntentsBitField,
-  ApplicationCommandOptionType,
-} = require("discord.js");
+const { Client, IntentsBitField, ChannelType } = require("discord.js");
+require("dotenv").config();
 const client = new Client({
   intents: [
     IntentsBitField.Flags.Guilds,
-    IntentsBitField.Flags.GuildMembers,
-    IntentsBitField.Flags.GuildMessages,
-    IntentsBitField.Flags.MessageContent,
+    IntentsBitField.Flags.GuildVoiceStates,
   ],
 });
-require("dotenv").config();
+
+// Target voice channel ID
+const targetVoiceChannelId = "1201857462177632276";
+const PrivateRoom = "1202308314898374676";
 
 client.once("ready", () => {
   console.log("Bot is ready!");
@@ -20,38 +18,133 @@ client.once("ready", () => {
 client.on("voiceStateUpdate", async (oldState, newState) => {
   const newUserChannel = newState.channel;
   const oldUserChannel = oldState.channel;
-  console.log(oldState, newState);
-
-  if (newUserChannel && newUserChannel.id === 1027855478040055861) {
+  const user = await client.users.fetch(newState.id);
+  //create adventure
+  if (newUserChannel && newUserChannel.id === targetVoiceChannelId) {
     const guild = newState.guild;
-    const category = await guild.channels.create("New Category", {
-      type: "category",
+
+    const category = await guild.channels.create({
+      name: "Adventure Room",
+      type: ChannelType.GuildCategory,
     });
 
-    const voiceChannel = await guild.channels.create("New Voice Channel", {
-      type: "voice",
+    const md_scene = await guild.channels.create({
+      name: `DM-SCENE`,
+      type: ChannelType.GuildText,
       parent: category,
     });
 
-    const textChannel = await guild.channels.create("New Text Channel", {
-      type: "text",
+    const text = await guild.channels.create({
+      name: `Dice Room`,
+      type: ChannelType.GuildText,
       parent: category,
     });
 
-    // Move the user to the newly created voice channel
-    newState.setChannel(voiceChannel);
+    const chat = await guild.channels.create({
+      name: `Chat Room`,
+      type: ChannelType.GuildText,
+      parent: category,
+    });
+
+    const note = await guild.channels.create({
+      name: `Note Room`,
+      type: ChannelType.GuildText,
+      parent: category,
+    });
+
+    const Music = await guild.channels.create({
+      name: `Music Room`,
+      type: ChannelType.GuildText,
+      parent: category,
+    });
+
+    const voice = await guild.channels.create({
+      name: `Voice Room`,
+      type: ChannelType.GuildVoice,
+      parent: category,
+    });
+
+    try {
+      await newState.setChannel(voice);
+    } catch (error) {
+      if (oldUserChannel && oldUserChannel.id !== targetVoiceChannelId) {
+        const category = oldUserChannel.parent;
+        const all = oldUserChannel.parent.children.cache;
+
+        if (
+          category &&
+          category.name === "Adventure Room" &&
+          oldUserChannel.members.size === 0
+        ) {
+          all.forEach((channel) => {
+            channel.delete();
+          });
+          category.delete();
+        }
+      }
+    }
   }
+  //create private
+  if (newUserChannel && newUserChannel.id === PrivateRoom) {
+    const guild = newState.guild;
 
-  // Clean up the category if no one is in the voice channel
-  if (oldUserChannel && oldUserChannel.id !== 1027855478040055861) {
+    const voice = await guild.channels.create({
+      name: `Private Room`,
+      type: ChannelType.GuildVoice,
+      parent: newState.channel.parent,
+    });
+
+    // await voice.setUserLimit(2);
+
+    try {
+      await newState.setChannel(voice);
+    } catch (error) {
+      if (oldUserChannel && oldUserChannel.id !== PrivateRoom) {
+        const category = oldUserChannel.parent;
+        const all = oldUserChannel.parent.children.cache;
+
+        if (
+          category &&
+          category.name === "Private Room" &&
+          oldUserChannel.members.size === 0
+        ) {
+          all.forEach((channel) => {
+            channel.delete();
+          });
+          category.delete();
+        }
+      }
+    }
+  }
+  //remove adventure room
+  if (oldUserChannel && oldUserChannel.id !== targetVoiceChannelId) {
     const category = oldUserChannel.parent;
+    const all = oldUserChannel.parent.children.cache;
+
     if (
       category &&
-      category.name === "New Category" &&
+      category.name === "Adventure Room" &&
       oldUserChannel.members.size === 0
     ) {
-      category.children.forEach((child) => child.delete());
+      all.forEach((channel) => {
+        channel.delete();
+      });
       category.delete();
+    }
+  }
+
+  //remove private
+  if (oldUserChannel && oldUserChannel.id !== targetVoiceChannelId) {
+    const category = oldUserChannel.parent;
+    const voicePrivateChannel = oldState.channel;
+
+    if (
+      category &&
+      category.name === "Private Room" &&
+      voicePrivateChannel.name === "Private Room" &&
+      oldUserChannel.members.size === 0
+    ) {
+      await voicePrivateChannel.delete();
     }
   }
 });
