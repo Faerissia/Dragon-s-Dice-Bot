@@ -50,20 +50,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
       name: `DM-SCENE`,
       type: ChannelType.GuildText,
       parent: category,
-      permissionOverwrites: [
-        {
-          id: guild.roles.everyone.id,
-          deny: [PermissionFlagsBits.ViewChannel],
-        },
-        {
-          id: roleId,
-          allow: [PermissionFlagsBits.ViewChannel],
-        },
-        {
-          id: "1201402259427303475",
-          allow: [PermissionFlagsBits.ViewChannel],
-        },
-      ],
+      permissionOverwrites: permissionOverwrites,
     });
 
     const text = await guild.channels.create({
