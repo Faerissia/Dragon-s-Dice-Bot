@@ -1,4 +1,9 @@
-const { Client, IntentsBitField, ChannelType } = require("discord.js");
+const {
+  Client,
+  IntentsBitField,
+  ChannelType,
+  PermissionFlagsBits,
+} = require("discord.js");
 require("dotenv").config();
 const client = new Client({
   intents: [
@@ -22,46 +27,78 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
   //create adventure
   if (newUserChannel && newUserChannel.id === targetVoiceChannelId) {
     const guild = newState.guild;
+    const roleId = "1266364589755465795";
+
+    const permissionOverwrites = [
+      {
+        id: guild.roles.everyone.id,
+        deny: [PermissionFlagsBits.ViewChannel],
+      },
+      {
+        id: roleId,
+        allow: [PermissionFlagsBits.ViewChannel],
+      },
+    ];
 
     const category = await guild.channels.create({
       name: "Adventure Room",
       type: ChannelType.GuildCategory,
+      permissionOverwrites: permissionOverwrites,
     });
 
     const md_scene = await guild.channels.create({
       name: `DM-SCENE`,
       type: ChannelType.GuildText,
       parent: category,
+      permissionOverwrites: [
+        {
+          id: guild.roles.everyone.id,
+          deny: [PermissionFlagsBits.ViewChannel],
+        },
+        {
+          id: roleId,
+          allow: [PermissionFlagsBits.ViewChannel],
+        },
+        {
+          id: "1201402259427303475",
+          allow: [PermissionFlagsBits.ViewChannel],
+        },
+      ],
     });
 
     const text = await guild.channels.create({
       name: `Dice Room`,
       type: ChannelType.GuildText,
       parent: category,
+      permissionOverwrites: permissionOverwrites,
     });
 
     const chat = await guild.channels.create({
       name: `Chat Room`,
       type: ChannelType.GuildText,
       parent: category,
+      permissionOverwrites: permissionOverwrites,
     });
 
     const note = await guild.channels.create({
       name: `Note Room`,
       type: ChannelType.GuildText,
       parent: category,
+      permissionOverwrites: permissionOverwrites,
     });
 
     const Music = await guild.channels.create({
       name: `Music Room`,
       type: ChannelType.GuildText,
       parent: category,
+      permissionOverwrites: permissionOverwrites,
     });
 
     const voice = await guild.channels.create({
       name: `Voice Room`,
       type: ChannelType.GuildVoice,
       parent: category,
+      permissionOverwrites: permissionOverwrites,
     });
 
     try {
@@ -140,7 +177,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 
     if (
       category &&
-      category.name === "Private Room" &&
+      category.name === "-----Private Room-----" &&
       voicePrivateChannel.name === "Private Room" &&
       oldUserChannel.members.size === 0
     ) {
